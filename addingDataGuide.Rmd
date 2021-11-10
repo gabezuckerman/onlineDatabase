@@ -1,0 +1,43 @@
+---
+title: "How to add data"
+author: "Gabe Zuckerman"
+date: "11/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(data.table)
+library(tidyverse)
+library(rmarkdown)
+
+```
+
+# Relational database architechure
+
+On the google drive, the raw data is roughly stored in this format:
+
+![](puma_db_graph.png)
+
+To add data, you need to format the data to match the 4 leftmost tables and run the `addToDB.R` script.
+
+# 1.) the animals table
+
+The animals tables is formatted like this (used the arrows to see additional rows and columns):
+
+
+```{r animals, layout="l-body-outset"}
+head(fread("newDatabaseFiles/animals.csv"), 20) %>% paged_table(options = list(cols.print = 5))
+```
+
+Important additional info: `species_code` 1 means elk, `species_code` 2 means wolf (though think I removed them from this iteration of the database)
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

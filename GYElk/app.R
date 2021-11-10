@@ -1,3 +1,7 @@
+#instead of using shiny authentication--draw directly from google drive, using 
+#their authentication--see wildlife recovery doc
+
+
 # define some credentials
 credentials <- data.frame(
     user = c("g"), # mandatory
