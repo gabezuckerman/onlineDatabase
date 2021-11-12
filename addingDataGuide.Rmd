@@ -19,25 +19,42 @@ On the google drive, the raw data is roughly stored in this format:
 
 ![](puma_db_graph.png)
 
-To add data, you need to format the data to match the 4 leftmost tables and run the `addToDB.R` script.
+To add data, you need to format the data to match the 4 leftmost tables and run the `addToDB.R` script.  When formatting, it is okay if you don't have information for all the columns, so long as the information you do have exactly matches the format the data is already in.
 
-# 1.) the animals table
+## 1.) the animals table
 
-The animals tables is formatted like this (used the arrows to see additional rows and columns):
+#### Necesary columns: `animals_code` and `data_source`
+
+The animals table is formatted like this (used the arrows to see additional rows and columns):
 
 
 ```{r animals, layout="l-body-outset"}
 head(fread("newDatabaseFiles/animals.csv"), 20) %>% paged_table(options = list(cols.print = 5))
 ```
 
-Important additional info: `species_code` 1 means elk, `species_code` 2 means wolf (though think I removed them from this iteration of the database)
+Important additional info: `species_code` 1 means elk, `species_code` 2 means wolf (though think I removed them from this iteration of the database).  We can add more species if we wanted to add puma, guanaco etc.
 
-## Including Plots
+## 2.) the sensors table
 
-You can also embed plots, for example:
+#### Necesary column: `gps_sensors_code` 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+The sensors table is formatted like this (used the arrows to see additional rows and columns):
+
+
+```{r sensors, layout="l-body-outset"}
+head(fread("newDatabaseFiles/sensors.csv"), 20) %>% paged_table(options = list(cols.print = 5))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## 1.) the sensors-animals table
+
+#### Necesary columns: `gps_sensors_animals_id`, `animals_code`, `gps_sensors_code`, `start_time` and `end_time`
+
+The sensors-animals table is formatted like this (used the arrows to see additional rows and columns):
+
+
+```{r sensAni, layout="l-body-outset"}
+head(fread("newDatabaseFiles/sensorsAnimals.csv"), 20) %>% paged_table(options = list(cols.print = 5))
+```
+
+Important additional info: This is the key table. `gps_sensors_animals_id` is the main identifier combining both the animal and collar.  Potentially 
