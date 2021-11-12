@@ -46,7 +46,7 @@ head(fread("newDatabaseFiles/sensors.csv"), 20) %>% paged_table(options = list(c
 ```
 
 
-## 1.) the sensors-animals table
+## 3.) the sensors-animals table
 
 #### Necesary columns: `gps_sensors_animals_id`, `animals_code`, `gps_sensors_code`, `start_time` and `end_time`
 
@@ -57,4 +57,6 @@ The sensors-animals table is formatted like this (used the arrows to see additio
 head(fread("newDatabaseFiles/sensorsAnimals.csv"), 20) %>% paged_table(options = list(cols.print = 5))
 ```
 
-Important additional info: This is the key table. `gps_sensors_animals_id` is the main identifier combining both the animal and collar.  Potentially 
+Important additional info: This is the key table. `gps_sensors_animals_id` is the main identifier combining both the animal and collar.  Potentially could automatically created this table from cleaned* animals, sensors and GPS tables.
+
+*Up to now, this database is somewhat cleaned, meaning that when I built this at the end of 2019, I did a little bit of cleaning to ensure there were no duplicate animals, but didn't clean to the extent that there are no errant GPS points.
