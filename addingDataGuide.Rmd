@@ -57,6 +57,19 @@ The sensors-animals table is formatted like this (used the arrows to see additio
 head(fread("newDatabaseFiles/sensorsAnimals.csv"), 20) %>% paged_table(options = list(cols.print = 5))
 ```
 
-Important additional info: This is the key table. `gps_sensors_animals_id` is the main identifier combining both the animal and collar.  Potentially could automatically created this table from cleaned* animals, sensors and GPS tables.
+Important additional info: This is the key relational table. `gps_sensors_animals_id` is the main identifier combining both the animal and collar.  Potentially could automatically created this table from cleaned* animals, sensors and GPS tables.
 
 *Up to now, this database is somewhat cleaned, meaning that when I built this at the end of 2019, I did a little bit of cleaning to ensure there were no duplicate animals, but didn't clean to the extent that there are no errant GPS points.
+
+## 4.) the GPS table
+
+#### Necesary columns: `gps_sensors_code`, `latitude`, `longitude`, and `acquisition_time`
+
+The GPS table is formatted like this (used the arrows to see additional rows and columns):
+
+
+```{r gps, layout="l-body-outset"}
+head(fread("newDatabaseFiles/gpsSubset.csv"), 20) %>% paged_table(options = list(cols.print = 5))
+```
+
+Important additional info: this only includes successful fixes as of now.  It also contains a bunch of extra columns that aren't really necessary--we can discuss removing them.
