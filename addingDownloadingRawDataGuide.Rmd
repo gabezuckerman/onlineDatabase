@@ -1,7 +1,7 @@
 ---
-title: "How to add data"
+title: "How to add and download raw data"
 author: "Gabe Zuckerman"
-date: "11/10/2021"
+date: "1/20/2022"
 output: html_document
 ---
 
@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = F)
 library(data.table)
 library(tidyverse)
 library(rmarkdown)
+library(lubridate)
 
 ```
 
@@ -57,6 +58,14 @@ head(fread("newDatabaseFiles/animals.csv"), 20) %>% paged_table(options = list(c
 `note`: if there is anything else we need to know about the animal
 
 `insert_timestamp`: just use now() function when creating the column, good to know for version control's sake
+
+`commonHerd`: leave as herd, unless the herd is a subset of another herd
+
+`coreGYE`: herds used in Gigliotti et al. 2021, generally herds that migrate into Yellowstone. YES/NO
+
+`Fed`: does this herd have access to feedgrounds YES/NO
+
+
 
 ##### Helpful code/tips to create this table
 
@@ -113,9 +122,9 @@ head(fread("newDatabaseFiles/sensorsAnimals.csv"), 20) %>% paged_table(options =
 
 `gps_sensors_code`: see above
 
-`start_time`: collar deployment date
+`start_time`: collar deployment date, in ymd_hms format
 
-`end_time`: `NA` if ongoing, otherwise put the date the collar was removed or fell off
+`end_time`: `NA` if ongoing, otherwise put the date the collar was removed or fell off, in ymd_hms format
 
 `status`: "inactive" if `end_time` is earlier than present date, otherwise "active"
 
@@ -221,3 +230,49 @@ fwrite(newGPS, "gps.csv")
 ## 3.) Drag your new updated files into the `data/movement data/GYElk/raw` folder on box.
 
 Box automatically has version control, so it should store the past ~20 or so versions of the database, in case any mistakes are made.
+
+# If you need to download raw data...
+
+#### Use the following code to leverage the database architechture to create the gps_data_animals table
+
+First, download the the 4 files from `data/movement data/GYElk/raw` and place them in your working directory.
+
+```{r download raw data, eval = F, echo = T}
+
+#taking relevant columns from sensorsAnimals and animals
+sensAniCols <- sensorsAnimals %>% dplyr::select(gps_sensors_animals_id, animals_code, gps_sensors_code)
+aniCols <- animals %>% dplyr::select(animals_code, herd, commonHerd, coreGYE, Fed)
+
+#merging by animals_code, should be one row per deployment
+infoCols <- merge(sensAniCols, aniCols)
+
+#taking relevant columns from gps data
+gpsCols <- gps %>% dplyr::select(gps_sensors_code, acquisition_time, latitude, longitude)
+
+#merging by gps_sensors_code, should be one row per gps fix
+gpsAnimalsData <- merge(infoCols, gpsCols, by = "gps_sensors_code", allow.cartesian=TRUE)
+
+#now ensuring that each individuals data is between the proper start/end date
+filterToDeployment <- function(id) {
+  
+  #gets movement data
+  indivData <- gpsAnimalsData %>% filter(gps_sensors_animals_id == id)
+
+  #deployment start and end dates
+  start <- filter(sensorsAnimals, gps_sensors_animals_id == id)$start_time
+  end <- filter(sensorsAnimals, gps_sensors_animals_id == id)$end_time
+  
+  #filters to within appropriate interval, handles the various time formats
+  if (end != "") {
+    return(indivData %>% filter(parse_date_time(acquisition_time, orders = c("mdy_HM", "mdy", "ymd_HMS", "ymd")) >= parse_date_time(start, orders = c("mdy_HM", "mdy", "ymd_HMS", "ymd"))) %>% 
+             filter(parse_date_time(acquisition_time, orders = c("mdy_HM", "mdy", "ymd_HMS", "ymd")) <= parse_date_time(end, c("mdy_HM", "mdy", "ymd_HMS", "ymd"))))
+  } else {
+    return(indivData %>% filter(parse_date_time(acquisition_time, orders = c("mdy_HM", "mdy", "ymd_HMS", "ymd")) >= parse_date_time(start, c("mdy_HM", "mdy", "ymd_HMS", "ymd"))))
+  }
+}
+
+#may take a while, on my machine it took about 5 minutes
+gpsAnimalsDataFiltered <- map_dfr(sensorsAnimals$gps_sensors_animals_id, filterToDeployment)
+
+
+```
